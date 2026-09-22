@@ -36839,11 +36839,12 @@ async function run() {
     const clientSecret = core.getInput('client_secret');
     const accessHost = core.getInput('access_host');
     core.setSecret(clientSecret);
-    if (!accessHost.startsWith('access.')) {
+    const ACCESS_HOST_PREFIX = 'access.';
+    if (!accessHost.startsWith(ACCESS_HOST_PREFIX)) {
         core.setFailed(`Invalid access_host "${accessHost}". Expected a hostname starting with "access." (e.g. access.crowdstrike.com)`);
         return;
     }
-    const tokenUrl = `https://api.${accessHost.slice('access.'.length)}/oauth2/token`;
+    const tokenUrl = `https://api.${accessHost.replace(ACCESS_HOST_PREFIX, '')}/oauth2/token`;
     let accessToken;
     try {
         accessToken = await (0, auth_1.getAccessToken)({ clientId, clientSecret, tokenUrl });
@@ -36899,14 +36900,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Query = void 0;
 class Query {
     token;
-    domain;
+    accessHost;
     principalId;
     assetId;
     action;
     endpointUrl;
-    constructor(token, domain, principalId, assetId, action) {
+    constructor(token, accessHost, principalId, assetId, action) {
         this.token = token;
-        this.domain = domain;
+        this.accessHost = accessHost;
         this.principalId = principalId;
         this.assetId = assetId;
         this.action = action;
@@ -36916,9 +36917,9 @@ class Query {
         if (!this.principalId) {
             throw new Error('A principalId is required.');
         }
-        this.endpointUrl = new URL('/v1/evaluations', `https://${domain}`);
+        this.endpointUrl = new URL('/v1/evaluations', `https://${accessHost}`);
         if (this.endpointUrl.protocol !== 'https:') {
-            throw new Error(`Invalid API endpoint from domain ${domain}. Endpoint must be https://`);
+            throw new Error(`Invalid API endpoint from accessHost ${accessHost}. Endpoint must be https://`);
         }
     }
     headers() {
