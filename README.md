@@ -28,7 +28,7 @@ steps:
     id: ngis
     uses: <<TBD>>
     with:
-      access_host: ${{ vars.crowdstrike_access_host }}
+      access_host: ${{ vars.access_host }}
       client_id: ${{ vars.client_id }}
       client_secret: ${{ secrets.client_secret }}
       principal_id: ${{ github.actor }}
