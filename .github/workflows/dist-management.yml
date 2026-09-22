@@ -1,5 +1,4 @@
-# Manages dist/ directory - checks if it's up to date and automatically updates it for PRs
-# Replaces both check-dist.yml and dependabot-rebuild.yml with unified logic
+# Checks if dist/ is up to date with the source
 name: Dist Management
 permissions: read-all
 
@@ -17,25 +16,17 @@ on:
 
 jobs:
   manage-dist:
-    name: Check and Update Dist
+    name: Check Dist
     runs-on: ubuntu-latest
-    environment: github-actions
 
     permissions:
-      contents: write
-      statuses: write
-      pull-requests: write
-
-    outputs:
-      dist-updated: ${{ steps.update.outputs.updated }}
+      contents: read
 
     steps:
       - name: Checkout
         id: checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.head_ref }}
           persist-credentials: false
 
       - name: Setup Node.js
@@ -52,65 +43,11 @@ jobs:
         id: build
         run: npm run bundle
 
-      - name: Compare Expected and Actual Directories
-        id: diff
+      - name: Fail if dist out of sync
         run: |
           if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-            echo "Detected uncommitted changes after build. See status below:"
+            echo "::error::Dist files are out of sync. Run 'npm run bundle' and commit the changes."
             git diff --ignore-space-at-eol --text dist/
-          else
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No changes detected in dist/ directory"
+            exit 1
           fi
-
-      - name: Generate GitHub App token
-        id: app_token
-        if:
-          steps.diff.outputs.has_changes == 'true' && github.event_name ==
-          'pull_request'
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: Configure Git with App Token
-        if:
-          steps.diff.outputs.has_changes == 'true' && github.event_name ==
-          'pull_request'
-        run: |
-          git config --global user.name "${STEPS_APP_TOKEN_OUTPUTS_APP_SLUG}[bot]"
-          git config --global user.email "${STEPS_APP_TOKEN_OUTPUTS_APP_SLUG}[bot]@users.noreply.github.com"
-          git config --global url."https://x-access-token:${STEPS_APP_TOKEN_OUTPUTS_TOKEN}@github.com".insteadOf "https://github.com"
-        env:
-          STEPS_APP_TOKEN_OUTPUTS_APP_SLUG:
-            ${{ steps.app_token.outputs.app-slug }}
-          STEPS_APP_TOKEN_OUTPUTS_TOKEN: ${{ steps.app_token.outputs.token }}
-
-      - name: Update dist for PRs
-        id: update
-        if:
-          steps.diff.outputs.has_changes == 'true' && github.event_name ==
-          'pull_request'
-        run: |
-          git add dist/
-          git commit -m "chore: update dist files"
-          git push
-          echo "updated=true" >> "$GITHUB_OUTPUT"
-          echo "✅ Dist files updated and committed"
-
-      - name: Fail if dist out of sync on main
-        if:
-          steps.diff.outputs.has_changes == 'true' && github.event_name ==
-          'push'
-        run: |
-          echo "::error::Dist files are out of sync on main branch. Run 'npm run bundle' and commit the changes."
-          exit 1
-
-      # If index.js was different than expected, upload the expected version as
-      # a workflow artifact.
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: ${{ failure() && steps.diff.conclusion == 'failure' }}
-        with:
-          name: dist
-          path: dist/
+          echo "Dist files are up to date"
