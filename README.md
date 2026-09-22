@@ -1,7 +1,7 @@
 # Falcon Next-Gen Identity Security Policy Action
 
-[![GitHub Super-Linter](https://github.com/actions/javascript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/javascript-action/actions/workflows/ci.yml/badge.svg)
+[![Lint Code Base](https://github.com/CrowdStrike/ngis-sgnl-policy-action/actions/workflows/linter.yml/badge.svg)](https://github.com/CrowdStrike/ngis-sgnl-policy-action/actions/workflows/linter.yml)
+![CI](https://github.com/CrowdStrike/ngis-sgnl-policy-action/actions/workflows/ci.yml/badge.svg)
 ![Code Coverage](badges/coverage.svg)
 
 ## Calling Falcon NGIS from a GitHub Action
@@ -98,32 +98,3 @@ Or, if you are just patching a bug against v2.0, create a patch tag for a bugfix
 Push the tags up to GitHub. The `-f` is required to update the v2 tag
 
 `git push --tags --force`
-
-### debugging super-linter issues
-
-Occasionally the super-linter runs into issues with GitHub Actions and you want
-to debug locally.
-
-#### Apple Silicon
-
-Until
-[super-linter#5070](https://github.com/super-linter/super-linter/issues/5070) is
-fixed
-
-```bash
-docker run --platform=linux/amd64 -e SHELL=/bin/bash -e DEFAULT_BRANCH=main -e \
-VALIDATE_JSCPD=false -e VALIDATE_JAVASCRIPT_STANDARD=false -e \
-VALIDATE_JAVASCRIPT_ES=false -e VALIDATE_JSON=false -e LOG_LEVEL=INFO \
--e RUN_LOCAL=true -v /path/to/local/policy-action:/tmp/lint \
---rm ghcr.io/super-linter/super-linter:latest
-```
-
-or generally other architectures
-
-```bash
-docker run -e DEFAULT_BRANCH=main -e VALIDATE_JSCPD=false \
--e VALIDATE_JAVASCRIPT_STANDARD=false -e LOG_LEVEL=INFO \
--e VALIDATE_JAVASCRIPT_ES=false -e VALIDATE_JSON=false -e \
-RUN_LOCAL=true -v /path/to/local/policy-action:/tmp/lint \
---rm ghcr.io/super-linter/super-linter:latest
-```
