@@ -11,7 +11,7 @@ can use this policy check to determine if the GitHub user is allowed to execute
 or trigger the workflow in question based on a policy definition in NGIS. To get
 started you will need to define a protected system and policy in the Falcon
 console. For more information on how to setup NGIS for GitHub, please see our
-[setup guide](<<TBD>>)
+[setup guide](TBD)
 
 ### Example
 
@@ -26,7 +26,7 @@ steps:
 
   - name: NGIS Policy Check
     id: ngis
-    uses: <<TBD>>
+    uses: TBD
     with:
       access_host: ${{ vars.access_host }}
       client_id: ${{ vars.client_id }}
