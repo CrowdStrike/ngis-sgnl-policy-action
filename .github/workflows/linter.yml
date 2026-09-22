@@ -6,13 +6,9 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
   push:
     branches-ignore:
       - main
-    paths-ignore:
-      - '**.md'
 
 jobs:
   check-if-should-run:
@@ -64,8 +60,6 @@ jobs:
         id: checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          # super-linter needs the full git history to get the
-          # list of files that changed across commits
           fetch-depth: 0
           persist-credentials: false
 
@@ -79,6 +73,13 @@ jobs:
       - name: Install Dependencies
         id: install
         run: npm ci
+
+      - name: Lint Markdown
+        id: markdown-lint
+        uses: DavidAnson/markdownlint-cli2-action@ded1f9488f68a970bc66ea5619e13e9b52e601cd # v23.2.0
+        with:
+          config: .github/linters/.markdown-lint.yml
+          globs: '**/*.md'
 
       - name: Check Formatting
         id: format-check
