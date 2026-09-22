@@ -1,0 +1,9 @@
+# Zizmor configuration
+# Suppress artipacked warning for release-tagger workflow
+# This workflow intentionally needs credentials to push tags and create releases
+# It only runs on push to main (trusted context), not on pull_request
+
+rules:
+  artipacked:
+    ignore:
+      - release-tagger.yml:16

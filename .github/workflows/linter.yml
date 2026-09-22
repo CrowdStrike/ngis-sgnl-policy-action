@@ -1,0 +1,95 @@
+name: Lint Code Base
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  push:
+    branches-ignore:
+      - main
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  check-if-should-run:
+    name: Check if linting should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run-linting: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check if dist needs updating
+        id: check
+        run: |
+          npm run bundle
+          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "⏭️ Skipping linting - dist files need updating first"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Running linting - dist files are up to date"
+          fi
+
+  lint:
+    name: Lint Code Base
+    needs: [check-if-should-run]
+    if: needs.check-if-should-run.outputs.should-run-linting == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # super-linter needs the full git history to get the
+          # list of files that changed across commits
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+
+      - name: Lint Code Base
+        id: super-linter
+        uses: super-linter/super-linter/slim@61abc07d755095a68f4987d1c2c3d1d64408f1f9 # v8.5.0
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_JSCPD: false
+          VALIDATE_JAVASCRIPT_ES: false
+          VALIDATE_JSON: false
+          VALIDATE_BIOME_FORMAT: false
+          VALIDATE_BIOME_LINT: false
+          FILTER_REGEX_EXCLUDE: dist/.*

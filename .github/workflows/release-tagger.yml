@@ -1,0 +1,75 @@
+name: Release Tagger
+
+on:
+  push:
+    branches: [main]
+    paths: ['dist/index.js']
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Get current version
+        id: version
+        run: |
+          # Get the current major version from existing tags
+          CURRENT_MAJOR=$(git tag | grep -E "^v[0-9]+$" | sed 's/v//' | sort -n | tail -1)
+          if [ -z "$CURRENT_MAJOR" ]; then
+            CURRENT_MAJOR=1
+          fi
+
+          # Get the latest patch version for this major version
+          LATEST_PATCH=$(git tag | grep -E "^v${CURRENT_MAJOR}\.[0-9]+\.[0-9]+$" | sed "s/v${CURRENT_MAJOR}\.//" | sort -V | tail -1)
+          if [ -z "$LATEST_PATCH" ]; then
+            NEW_VERSION="v${CURRENT_MAJOR}.0.0"
+          else
+            PATCH_NUM=$(echo "$LATEST_PATCH" | cut -d'.' -f2)
+            NEW_PATCH=$((PATCH_NUM + 1))
+            NEW_VERSION="v${CURRENT_MAJOR}.0.${NEW_PATCH}"
+          fi
+
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "major_version=v$CURRENT_MAJOR" >> "$GITHUB_OUTPUT"
+      - name: Create patch tag
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag "${STEPS_VERSION_OUTPUTS_NEW_VERSION}"
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${STEPS_VERSION_OUTPUTS_NEW_VERSION}"
+        env:
+          STEPS_VERSION_OUTPUTS_NEW_VERSION:
+            ${{ steps.version.outputs.new_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update major version tag
+        run: |
+          git tag -f "${STEPS_VERSION_OUTPUTS_MAJOR_VERSION}"
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${STEPS_VERSION_OUTPUTS_MAJOR_VERSION}" --force
+        env:
+          STEPS_VERSION_OUTPUTS_MAJOR_VERSION:
+            ${{ steps.version.outputs.major_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new_version }}
+        with:
+          script: |
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: process.env.NEW_VERSION,
+              name: process.env.NEW_VERSION,
+              body: 'Automated release for dist changes',
+              draft: false,
+              prerelease: false
+            });

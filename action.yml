@@ -1,0 +1,41 @@
+name: Check SGNL Policy
+author: SGNL.ai, Inc
+description: Calls SGNL for a policy check. Also see https://developer.sgnl.ai/
+inputs:
+  domain:
+    required: true
+    description: The SGNL API hostname -> {subdomain}.sgnlapis.cloud
+  token:
+    required: true
+    description:
+      The authentication token used to make calls to the SGNL access API
+  principalId:
+    required: true
+    description:
+      The identity of the principal executing this action. Typically a github
+      username or email address.
+  assetId:
+    required: false
+    description:
+      The identifier of an asset for this policy check. Typically the repo from
+      the action. At least one of 'assetId' or 'action' is required.
+  action:
+    required: false
+    description:
+      An optional action to pass to SGNL. At least one of 'assetId' or 'action'
+      is required.
+  bypassMode:
+    required: true
+    description:
+      Don't actually call SGNL, instead always return Allow. ~~WARNING~~ Setting
+      this to true will disable using SGNL. Use for testing or break glass only.
+    default: false
+
+outputs:
+  reason:
+    description: Any decision reason output from the policy evaluation.
+  decision:
+    description: Policy decision as a boolean. (true = Allow, false = Deny)
+runs:
+  using: node20
+  main: dist/index.js
