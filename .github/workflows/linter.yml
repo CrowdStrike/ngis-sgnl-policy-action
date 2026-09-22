@@ -80,16 +80,10 @@ jobs:
         id: install
         run: npm ci
 
-      - name: Lint Code Base
-        id: super-linter
-        uses: super-linter/super-linter/slim@61abc07d755095a68f4987d1c2c3d1d64408f1f9 # v8.5.0
-        env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_JAVASCRIPT_STANDARD: false
-          VALIDATE_JSCPD: false
-          VALIDATE_JAVASCRIPT_ES: false
-          VALIDATE_JSON: false
-          VALIDATE_BIOME_FORMAT: false
-          VALIDATE_BIOME_LINT: false
-          FILTER_REGEX_EXCLUDE: dist/.*
+      - name: Check Formatting
+        id: format-check
+        run: npm run format:check
+
+      - name: Lint
+        id: lint
+        run: npm run lint
