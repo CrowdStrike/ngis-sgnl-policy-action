@@ -46,8 +46,8 @@ jobs:
             echo "✅ Running tests - dist files are up to date"
           fi
 
-  test-javascript:
-    name: JavaScript Tests
+  test-typescript:
+    name: TypeScript Tests
     needs: [check-if-should-run]
     if: needs.check-if-should-run.outputs.should-run-tests == 'true'
     runs-on: ubuntu-latest
