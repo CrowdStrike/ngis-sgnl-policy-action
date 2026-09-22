@@ -19,10 +19,7 @@ export async function getAccessToken({
     client_secret: clientSecret
   })
 
-  const response = await axios.post<{ access_token?: string }>(
-    tokenUrl,
-    params
-  )
+  const response = await axios.post<{ access_token?: string }>(tokenUrl, params)
 
   if (!response.data.access_token) {
     throw new Error('OAuth2 token response missing access_token')

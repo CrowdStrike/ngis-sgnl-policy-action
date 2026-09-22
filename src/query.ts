@@ -5,7 +5,7 @@ export interface QueryPayload {
 
 export class Query {
   token: string
-  domain: string
+  accessHost: string
   principalId: string
   assetId: string
   action: string
@@ -13,13 +13,13 @@ export class Query {
 
   constructor(
     token: string,
-    domain: string,
+    accessHost: string,
     principalId: string,
     assetId: string,
     action: string
   ) {
     this.token = token
-    this.domain = domain
+    this.accessHost = accessHost
     this.principalId = principalId
     this.assetId = assetId
     this.action = action
@@ -28,21 +28,15 @@ export class Query {
       throw new Error("At least one of 'assetId' or 'action' is required.")
     }
 
-    if (!this.token) {
-      throw new Error(
-        'A token is required to call the SGNL API. Please see https://help.sgnl.ai for more details'
-      )
-    }
-
     if (!this.principalId) {
       throw new Error('A principalId is required.')
     }
 
-    this.endpointUrl = new URL('/access/v2/evaluations', `https://${domain}`)
+    this.endpointUrl = new URL('/v1/evaluations', `https://${accessHost}`)
 
     if (this.endpointUrl.protocol !== 'https:') {
       throw new Error(
-        `Invalid API endpoint from domain ${domain}. Endpoint must be https://`
+        `Invalid API endpoint from accessHost ${accessHost}. Endpoint must be https://`
       )
     }
   }

@@ -29,7 +29,7 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: './tsconfig.json',
+        project: path.resolve(__dirname, '../../tsconfig.eslint.json'),
         tsconfigRootDir: path.resolve(__dirname, '../..')
       },
       globals: {

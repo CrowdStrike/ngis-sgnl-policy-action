@@ -29,7 +29,7 @@
     "format:write": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
     "lint": "eslint . -c ./.github/linters/eslint.config.mjs",
-    "package": "ncc build src/index.ts --license licenses.txt",
+    "package": "ncc build src/index.ts --license licenses.txt --transpile-only",
     "package:watch": "npm run package -- --watch",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -40,15 +40,30 @@
     "verbose": true,
     "clearMocks": true,
     "testEnvironment": "node",
-    "moduleFileExtensions": ["ts", "js"],
-    "testMatch": ["**/*.test.ts"],
-    "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
     "transform": {
       "^.+\\.ts$": "babel-jest"
     },
-    "coverageReporters": ["json-summary", "text", "lcov"],
+    "coverageReporters": [
+      "json-summary",
+      "text",
+      "lcov"
+    ],
     "collectCoverage": true,
-    "collectCoverageFrom": ["./src/**/*.ts"]
+    "collectCoverageFrom": [
+      "./src/**/*.ts",
+      "!./src/**/*.test.ts"
+    ]
   },
   "overrides": {
     "axios": "1.20.0",
@@ -64,6 +79,7 @@
     "@babel/eslint-parser": "7.29.7",
     "@babel/preset-env": "7.29.7",
     "@babel/preset-typescript": "7.29.7",
+    "@types/jest": "^30.0.0",
     "@types/node": "26.5.1",
     "@typescript-eslint/eslint-plugin": "8.67.0",
     "@typescript-eslint/parser": "8.67.0",

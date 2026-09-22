@@ -1,5 +1,5 @@
-import { sgnl } from '../src/sgnl'
-import { Query } from '../src/query'
+import { sgnl } from './sgnl'
+import { Query } from './query'
 import * as core from '@actions/core'
 import axios from 'axios'
 
@@ -10,8 +10,22 @@ jest.spyOn(core, 'debug').mockImplementation()
 jest.spyOn(core, 'info').mockImplementation()
 jest.spyOn(core, 'warning').mockImplementation()
 
-let allowData: { decisions: { action: string; assetId: string; decision: string; reasons?: string[] }[] }
-let denyData: { decisions: { action: string; assetId: string; decision: string; reasons?: string[] }[] }
+let allowData: {
+  decisions: {
+    action: string
+    assetId: string
+    decision: string
+    reasons?: string[]
+  }[]
+}
+let denyData: {
+  decisions: {
+    action: string
+    assetId: string
+    decision: string
+    reasons?: string[]
+  }[]
+}
 
 const basicQuery = new Query('t', 'a.com', 'p', 'a1', 'a2')
 
@@ -19,11 +33,15 @@ beforeEach(() => {
   jest.clearAllMocks()
 
   allowData = {
-    decisions: [{ action: 'c', assetId: 'b', decision: 'Allow', reasons: ['allowed!!'] }]
+    decisions: [
+      { action: 'c', assetId: 'b', decision: 'Allow', reasons: ['allowed!!'] }
+    ]
   }
 
   denyData = {
-    decisions: [{ action: 'c', assetId: 'b', decision: 'Deny', reasons: ['denied!!'] }]
+    decisions: [
+      { action: 'c', assetId: 'b', decision: 'Deny', reasons: ['denied!!'] }
+    ]
   }
 })
 

@@ -1,12 +1,12 @@
-import { run } from '../src/main'
+import { run } from './main'
 
-jest.mock('../src/main', () => ({
+jest.mock('./main', () => ({
   run: jest.fn()
 }))
 
 describe('index', () => {
   it('calls run when imported', async () => {
-    require('../src/index')
+    await import('./index')
     expect(run).toHaveBeenCalled()
   })
 })

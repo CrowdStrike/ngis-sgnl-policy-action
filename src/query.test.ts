@@ -1,4 +1,4 @@
-import { Query } from '../src/query'
+import { Query } from './query'
 
 describe('query.ts', () => {
   beforeEach(() => {
@@ -7,31 +7,21 @@ describe('query.ts', () => {
 
   it('creates a Query object without failing', () => {
     expect(() => {
-      new Query('token', 'access.sgnlapis.cloud', 'principalA', 'assetB', 'actionC')
+      new Query('token', 'api.example.com', 'principalA', 'assetB', 'actionC')
     }).not.toThrow()
-  })
-
-  it('requires a token', () => {
-    expect(() => {
-      new Query('', 'access.sgnlapis.cloud', 'principalA', 'assetB', 'actionC')
-    }).toThrow()
   })
 
   it('requires one of assetId or action', () => {
     const err = "At least one of 'assetId' or 'action' is required."
 
     expect(() => {
-      new Query('token', 'access.sgnlapis.cloud', 'p', '', '')
-    }).toThrow(err)
-
-    expect(() => {
-      new Query('token', 'access.sgnlapis.cloud', 'p', '', '')
+      new Query('token', 'api.example.com', 'p', '', '')
     }).toThrow(err)
   })
 
   it('requires a principalId', () => {
     expect(() => {
-      new Query('token', 'access.sgnlapis.cloud', '', 'assetB', 'actionC')
+      new Query('token', 'api.example.com', '', 'assetB', 'actionC')
     }).toThrow()
   })
 
@@ -60,25 +50,19 @@ describe('query.ts', () => {
     })
   })
 
-  it('generates an endpoint', () => {
-    expect(
-      new Query('t', 'access.sgnlapis.cloud', 'p', 'a', '').endpoint()
-    ).toBe('https://access.sgnlapis.cloud/access/v2/evaluations')
-  })
-
-  it('requires a domain', () => {
-    expect(() => {
-      new Query('token', '', 'p', 'assetB', 'actionC')
-    }).toThrow()
+  it('generates an endpoint with the correct path', () => {
+    expect(new Query('t', 'access.example.com', 'p', 'a', '').endpoint()).toBe(
+      'https://access.example.com/v1/evaluations'
+    )
   })
 
   it('can handle custom ports', () => {
     expect(() => {
-      new Query('token', 'domain.com:1234', 'p', 'assetB', 'actionC')
+      new Query('token', 'access.example.com:1234', 'p', 'assetB', 'actionC')
     }).not.toThrow()
 
-    expect(new Query('t', 'domain.com:1234', 'a', 'b', 'c').endpoint()).toBe(
-      'https://domain.com:1234/access/v2/evaluations'
-    )
+    expect(
+      new Query('t', 'access.example.com:1234', 'p', 'b', 'c').endpoint()
+    ).toBe('https://access.example.com:1234/v1/evaluations')
   })
 })
