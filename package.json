@@ -1,7 +1,7 @@
 {
   "name": "ngis-sgnl-policy-action",
   "description": "CrowdStrike GitHub Action for SGNL policy-based access control",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "CrowdStrike",
   "private": true,
   "homepage": "https://github.com/CrowdStrike/ngis-sgnl-policy-action#readme",
@@ -21,7 +21,7 @@
     ".": "./dist/index.js"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "bundle": "npm run format:write && npm run package",

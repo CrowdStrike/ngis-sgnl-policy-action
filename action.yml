@@ -31,7 +31,7 @@ inputs:
     description:
       Don't actually call SGNL, instead always return Allow. ~~WARNING~~ Setting
       this to true will disable using SGNL. Use for testing or break glass only.
-    default: false
+    default: "false"
 
 outputs:
   reason:
@@ -39,5 +39,5 @@ outputs:
   decision:
     description: Policy decision as a boolean. (true = Allow, false = Deny)
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
