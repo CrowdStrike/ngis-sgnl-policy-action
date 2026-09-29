@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    labels:
+      - dependabot
+      - npm
+    schedule:
+      interval: weekly
+    groups:
+      development-dependencies:
+        dependency-type: 'development'
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        dependency-type: 'production'
+        update-types:
+          - minor
+          - patch
+    cooldown:
+      default-days: 7

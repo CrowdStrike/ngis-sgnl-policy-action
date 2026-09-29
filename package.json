@@ -1,0 +1,96 @@
+{
+  "name": "ngis-sgnl-policy-action",
+  "description": "CrowdStrike GitHub Action for SGNL policy-based access control",
+  "version": "0.1.0",
+  "author": "CrowdStrike",
+  "private": true,
+  "homepage": "https://github.com/CrowdStrike/ngis-sgnl-policy-action#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CrowdStrike/ngis-sgnl-policy-action.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CrowdStrike/ngis-sgnl-policy-action/issues"
+  },
+  "keywords": [
+    "GitHub",
+    "Actions",
+    "TypeScript"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "bundle": "npm run format:write && npm run package",
+    "ci-test": "jest",
+    "format:write": "prettier --write \"**/*.ts\"",
+    "format:check": "prettier --check \"**/*.ts\"",
+    "lint": "eslint . -c ./.github/linters/eslint.config.mjs",
+    "package": "ncc build src/index.ts --license licenses.txt --transpile-only",
+    "package:watch": "npm run package -- --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "all": "npm run format:write && npm run lint && npm run test && npm run package"
+  },
+  "license": "MIT",
+  "jest": {
+    "verbose": true,
+    "clearMocks": true,
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "transform": {
+      "^.+\\.ts$": "babel-jest"
+    },
+    "coverageReporters": [
+      "json-summary",
+      "text",
+      "lcov"
+    ],
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "./src/**/*.ts",
+      "!./src/**/*.test.ts"
+    ]
+  },
+  "overrides": {
+    "axios": "1.20.0",
+    "form-data": "^4.0.6",
+    "follow-redirects": "^1.16.0"
+  },
+  "dependencies": {
+    "@actions/core": "2.0.3",
+    "axios": "1.20.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@babel/eslint-parser": "7.29.7",
+    "@babel/preset-env": "7.29.7",
+    "@babel/preset-typescript": "7.29.7",
+    "@types/jest": "^30.0.0",
+    "@types/node": "26.5.1",
+    "@typescript-eslint/eslint-plugin": "8.67.0",
+    "@typescript-eslint/parser": "8.67.0",
+    "@vercel/ncc": "0.38.3",
+    "babel-preset-jest": "30.5.0",
+    "eslint": "9.39.2",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-jest": "29.0.1",
+    "globals": "17.12.0",
+    "jest": "30.3.0",
+    "prettier": "3.9.6",
+    "typescript": "5.8.3"
+  }
+}

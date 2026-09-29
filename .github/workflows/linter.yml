@@ -1,0 +1,92 @@
+name: Lint Code Base
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  check-if-should-run:
+    name: Check if linting should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run-linting: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check if dist needs updating
+        id: check
+        run: |
+          npm run bundle
+          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "⏭️ Skipping linting - dist files need updating first"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Running linting - dist files are up to date"
+          fi
+
+  lint:
+    name: Lint Code Base
+    needs: [check-if-should-run]
+    if: needs.check-if-should-run.outputs.should-run-linting == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+
+      - name: Lint Markdown
+        id: markdown-lint
+        uses: DavidAnson/markdownlint-cli2-action@ded1f9488f68a970bc66ea5619e13e9b52e601cd # v23.2.0
+        with:
+          config: .github/linters/.markdown-lint.yml
+          globs: |
+            **/*.md
+            !node_modules
+
+      - name: Check Formatting
+        id: format-check
+        run: npm run format:check
+
+      - name: Lint
+        id: lint
+        run: npm run lint

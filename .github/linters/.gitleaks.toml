@@ -1,0 +1,5 @@
+[allowlist]
+  # dist/ contains bundled third-party code and should not be scanned for secrets
+  paths = [
+    '''dist/'''
+  ]

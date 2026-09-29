@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+
+# Test coverage
+coverage
+*.lcov
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+*.pid
+*.pid.lock
+
+# Lint cache
+.eslintcache
+
+# npm
+.npm
+.npmrc
+*.tgz
+
+# dotenv
+.env
+.env.test
+
+# Test runner artifacts
+__tests__/runner/*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode
+*.code-workspace

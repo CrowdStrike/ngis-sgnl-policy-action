@@ -1,0 +1,83 @@
+name: Continuous Integration
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:
+    branches:
+      - main
+      - 'releases/*'
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  check-if-should-run:
+    name: Check if tests should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run-tests: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check if dist needs updating
+        id: check
+        run: |
+          npm run bundle
+          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "⏭️ Skipping tests - dist files need updating first"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Running tests - dist files are up to date"
+          fi
+
+  test-typescript:
+    name: TypeScript Tests
+    needs: [check-if-should-run]
+    if: needs.check-if-should-run.outputs.should-run-tests == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+
+      - name: Check Format
+        id: npm-format-check
+        run: npm run format:check
+
+      - name: Lint
+        id: npm-lint
+        run: npm run lint
+
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
