@@ -4,7 +4,9 @@ description: Calls SGNL for a policy check using Falcon OAuth2 client credential
 inputs:
   access_host:
     required: true
-    description: The SGNL access hostname (e.g. access.crowdstrike.com, access.us-2.crowdstrike.com)
+    description:
+      The SGNL access hostname, without scheme or path (e.g.
+      access.crowdstrike.com, access.us-2.crowdstrike.com).
   client_id:
     required: true
     description: Falcon Client ID for OAuth2 authentication
