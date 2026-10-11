@@ -5,11 +5,7 @@ import { getAccessToken } from './auth'
 
 const ACCESS_HOST_PREFIX = 'access.'
 
-// access.crowdstrike.com, access.<cloud>.crowdstrike.com, and the dev
-// equivalents on crowdstrike.red / crowdstrike.black. Any cloud subdomain
-// matches, so new clouds need no change here. Anchoring and the restricted
-// character set reject userinfo (@), ports, paths and schemes, which could
-// otherwise redirect the client secret and bearer token to another host.
+// access.crowdstrike.com or access.<cloud>.crowdstrike.com
 const ACCESS_HOST_PATTERN =
   /^access\.([a-z0-9-]+\.)*crowdstrike\.(com|red|black)$/
 
