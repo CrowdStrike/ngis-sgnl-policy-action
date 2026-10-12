@@ -31,7 +31,7 @@ describe('action', () => {
     inputs = {
       client_id: 'test-client-id',
       client_secret: 'test-client-secret',
-      access_host: 'access.example.com',
+      access_host: 'access.crowdstrike.com',
       principal_id: 'p',
       asset_id: 'a',
       action: 'b',
@@ -99,18 +99,76 @@ describe('action', () => {
     expect(getAccessTokenMock).toHaveBeenCalledWith({
       clientId: 'test-client-id',
       clientSecret: 'test-client-secret',
-      tokenUrl: 'https://api.example.com/oauth2/token'
+      tokenUrl: 'https://api.crowdstrike.com/oauth2/token'
     })
   })
 
-  it('fails if access_host does not start with access.', async () => {
-    inputs.access_host = 'api.example.com'
+  test.each([
+    {
+      host: 'access.crowdstrike.com',
+      tokenUrl: 'https://api.crowdstrike.com/oauth2/token'
+    },
+    {
+      host: 'access.eu-1.crowdstrike.com',
+      tokenUrl: 'https://api.eu-1.crowdstrike.com/oauth2/token'
+    },
+    {
+      host: 'access.us-2.crowdstrike.com',
+      tokenUrl: 'https://api.us-2.crowdstrike.com/oauth2/token'
+    },
+    {
+      host: 'access.dodo.crowdstrike.red',
+      tokenUrl: 'https://api.dodo.crowdstrike.red/oauth2/token'
+    },
+    {
+      host: 'access.dodo.crowdstrike.black',
+      tokenUrl: 'https://api.dodo.crowdstrike.black/oauth2/token'
+    },
+    {
+      host: 'access.new-cloud-9.crowdstrike.com',
+      tokenUrl: 'https://api.new-cloud-9.crowdstrike.com/oauth2/token'
+    },
+    {
+      host: 'ACCESS.US-2.CrowdStrike.com',
+      tokenUrl: 'https://api.us-2.crowdstrike.com/oauth2/token'
+    }
+  ])('accepts access_host `$host`', async ({ host, tokenUrl }) => {
+    inputs.access_host = host
+    sgnlMock.mockResolvedValue({ decision: true, reason: '' })
+
+    await main.run()
+    expect(getAccessTokenMock).toHaveBeenCalledWith(
+      expect.objectContaining({ tokenUrl })
+    )
+    expect(setFailedMock).not.toHaveBeenCalled()
+  })
+
+  test.each([
+    '',
+    'api.crowdstrike.com',
+    'crowdstrike.com',
+    'access.example.com',
+    'access.evil.example',
+    'access.crowdstrike.com.evil.example',
+    'access.crowdstrike.com@evil.example',
+    'access.crowdstrike.com:443',
+    'access.crowdstrike.com/v1/',
+    'https://access.crowdstrike.com',
+    'access.crowdstrike.com?x=evil.example',
+    'access.crowdstrike.com#evil.example',
+    'access.evilcrowdstrike.com',
+    'access.crowdstrike.community',
+    'access.crowdstrike.org',
+    'access.us-2.crowdstrike.com.'
+  ])('rejects access_host `%s`', async host => {
+    inputs.access_host = host
 
     await main.run()
     expect(setFailedMock).toHaveBeenCalledWith(
       expect.stringContaining('Invalid access_host')
     )
     expect(getAccessTokenMock).not.toHaveBeenCalled()
+    expect(sgnlMock).not.toHaveBeenCalled()
   })
 
   it('calls setSecret with clientSecret and access token', async () => {

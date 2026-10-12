@@ -36822,11 +36822,22 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.validateAccessHost = validateAccessHost;
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const sgnl_1 = __nccwpck_require__(1399);
 const query_1 = __nccwpck_require__(2087);
 const auth_1 = __nccwpck_require__(9081);
+const ACCESS_HOST_PREFIX = 'access.';
+// access.crowdstrike.com or access.<cloud>.crowdstrike.com
+const ACCESS_HOST_PATTERN = /^access\.([a-z0-9-]+\.)*crowdstrike\.(com|red|black)$/;
+function validateAccessHost(input) {
+    const host = input.trim().toLowerCase();
+    if (!ACCESS_HOST_PATTERN.test(host)) {
+        throw new Error(`Invalid access_host "${input}". Expected a CrowdStrike access hostname like access.crowdstrike.com or access.us-2.crowdstrike.com`);
+    }
+    return host;
+}
 async function run() {
     if (core.getInput('bypass_mode') === 'true') {
         core.warning('*** WARNING: BYPASS MODE ENABLED ***');
@@ -36837,14 +36848,16 @@ async function run() {
     }
     const clientId = core.getInput('client_id');
     const clientSecret = core.getInput('client_secret');
-    const accessHost = core.getInput('access_host');
     core.setSecret(clientSecret);
-    const ACCESS_HOST_PREFIX = 'access.';
-    if (!accessHost.startsWith(ACCESS_HOST_PREFIX)) {
-        core.setFailed(`Invalid access_host "${accessHost}". Expected a hostname starting with "access." (e.g. access.crowdstrike.com)`);
+    let accessHost;
+    try {
+        accessHost = validateAccessHost(core.getInput('access_host'));
+    }
+    catch (error) {
+        core.setFailed(error instanceof Error ? error.message : String(error));
         return;
     }
-    const tokenUrl = `https://api.${accessHost.replace(ACCESS_HOST_PREFIX, '')}/oauth2/token`;
+    const tokenUrl = `https://api.${accessHost.slice(ACCESS_HOST_PREFIX.length)}/oauth2/token`;
     let accessToken;
     try {
         accessToken = await (0, auth_1.getAccessToken)({ clientId, clientSecret, tokenUrl });

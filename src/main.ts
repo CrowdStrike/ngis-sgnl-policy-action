@@ -3,6 +3,24 @@ import { sgnl } from './sgnl'
 import { Query } from './query'
 import { getAccessToken } from './auth'
 
+const ACCESS_HOST_PREFIX = 'access.'
+
+// access.crowdstrike.com or access.<cloud>.crowdstrike.com
+const ACCESS_HOST_PATTERN =
+  /^access\.([a-z0-9-]+\.)*crowdstrike\.(com|red|black)$/
+
+export function validateAccessHost(input: string): string {
+  const host = input.trim().toLowerCase()
+
+  if (!ACCESS_HOST_PATTERN.test(host)) {
+    throw new Error(
+      `Invalid access_host "${input}". Expected a CrowdStrike access hostname like access.crowdstrike.com or access.us-2.crowdstrike.com`
+    )
+  }
+
+  return host
+}
+
 export async function run(): Promise<void> {
   if (core.getInput('bypass_mode') === 'true') {
     core.warning('*** WARNING: BYPASS MODE ENABLED ***')
@@ -14,20 +32,18 @@ export async function run(): Promise<void> {
 
   const clientId = core.getInput('client_id')
   const clientSecret = core.getInput('client_secret')
-  const accessHost = core.getInput('access_host')
 
   core.setSecret(clientSecret)
 
-  const ACCESS_HOST_PREFIX = 'access.'
-
-  if (!accessHost.startsWith(ACCESS_HOST_PREFIX)) {
-    core.setFailed(
-      `Invalid access_host "${accessHost}". Expected a hostname starting with "access." (e.g. access.crowdstrike.com)`
-    )
+  let accessHost: string
+  try {
+    accessHost = validateAccessHost(core.getInput('access_host'))
+  } catch (error) {
+    core.setFailed(error instanceof Error ? error.message : String(error))
     return
   }
 
-  const tokenUrl = `https://api.${accessHost.replace(ACCESS_HOST_PREFIX, '')}/oauth2/token`
+  const tokenUrl = `https://api.${accessHost.slice(ACCESS_HOST_PREFIX.length)}/oauth2/token`
 
   let accessToken: string
   try {
