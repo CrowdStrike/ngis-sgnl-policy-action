@@ -3,18 +3,16 @@ import { sgnl } from './sgnl'
 import { Query } from './query'
 import { getAccessToken } from './auth'
 
-const ACCESS_HOST_PREFIX = 'access.'
-
-// access.crowdstrike.com or access.<cloud>.crowdstrike.com
+// <label>[.<label>...].crowdstrike.(com|red|black)
 const ACCESS_HOST_PATTERN =
-  /^access\.([a-z0-9-]+\.)*crowdstrike\.(com|red|black)$/
+  /^[a-z0-9-]+(\.[a-z0-9-]+)*\.crowdstrike\.(com|red|black)$/
 
 export function validateAccessHost(input: string): string {
   const host = input.trim().toLowerCase()
 
   if (!ACCESS_HOST_PATTERN.test(host)) {
     throw new Error(
-      `Invalid access_host "${input}". Expected a CrowdStrike access hostname like access.crowdstrike.com or access.us-2.crowdstrike.com`
+      `Invalid access_host "${input}". Expected a CrowdStrike hostname like access.crowdstrike.com or access.dodo.crowdstrike.red`
     )
   }
 
@@ -43,7 +41,7 @@ export async function run(): Promise<void> {
     return
   }
 
-  const tokenUrl = `https://api.${accessHost.slice(ACCESS_HOST_PREFIX.length)}/oauth2/token`
+  const tokenUrl = `https://api.${accessHost.slice(accessHost.indexOf('.') + 1)}/oauth2/token`
 
   let accessToken: string
   try {

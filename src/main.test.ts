@@ -129,6 +129,10 @@ describe('action', () => {
       tokenUrl: 'https://api.new-cloud-9.crowdstrike.com/oauth2/token'
     },
     {
+      host: 'login.dodo.crowdstrike.red',
+      tokenUrl: 'https://api.dodo.crowdstrike.red/oauth2/token'
+    },
+    {
       host: 'ACCESS.US-2.CrowdStrike.com',
       tokenUrl: 'https://api.us-2.crowdstrike.com/oauth2/token'
     }
@@ -145,7 +149,6 @@ describe('action', () => {
 
   test.each([
     '',
-    'api.crowdstrike.com',
     'crowdstrike.com',
     'access.example.com',
     'access.evil.example',
