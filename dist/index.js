@@ -36828,13 +36828,12 @@ const core = __importStar(__nccwpck_require__(7484));
 const sgnl_1 = __nccwpck_require__(1399);
 const query_1 = __nccwpck_require__(2087);
 const auth_1 = __nccwpck_require__(9081);
-const ACCESS_HOST_PREFIX = 'access.';
-// access.crowdstrike.com or access.<cloud>.crowdstrike.com
-const ACCESS_HOST_PATTERN = /^access\.([a-z0-9-]+\.)*crowdstrike\.(com|red|black)$/;
+// <label>[.<label>...].crowdstrike.(com|red|black)
+const ACCESS_HOST_PATTERN = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.crowdstrike\.(com|red|black)$/;
 function validateAccessHost(input) {
     const host = input.trim().toLowerCase();
     if (!ACCESS_HOST_PATTERN.test(host)) {
-        throw new Error(`Invalid access_host "${input}". Expected a CrowdStrike access hostname like access.crowdstrike.com or access.us-2.crowdstrike.com`);
+        throw new Error(`Invalid access_host "${input}". Expected a CrowdStrike hostname like access.crowdstrike.com`);
     }
     return host;
 }
@@ -36857,7 +36856,7 @@ async function run() {
         core.setFailed(error instanceof Error ? error.message : String(error));
         return;
     }
-    const tokenUrl = `https://api.${accessHost.slice(ACCESS_HOST_PREFIX.length)}/oauth2/token`;
+    const tokenUrl = `https://api.${accessHost.slice(accessHost.indexOf('.') + 1)}/oauth2/token`;
     let accessToken;
     try {
         accessToken = await (0, auth_1.getAccessToken)({ clientId, clientSecret, tokenUrl });
