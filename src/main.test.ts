@@ -117,7 +117,7 @@ describe('action', () => {
       tokenUrl: 'https://api.us-2.crowdstrike.com/oauth2/token'
     },
     {
-      host: 'access.dodo.crowdstrike.red',
+      host: 'access.example.crowdstrike.red',
       tokenUrl: 'https://api.dodo.crowdstrike.red/oauth2/token'
     },
     {
