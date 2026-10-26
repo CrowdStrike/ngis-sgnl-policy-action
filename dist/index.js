@@ -36833,7 +36833,7 @@ const ACCESS_HOST_PATTERN = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.crowdstrike\.(com|red|b
 function validateAccessHost(input) {
     const host = input.trim().toLowerCase();
     if (!ACCESS_HOST_PATTERN.test(host)) {
-        throw new Error(`Invalid access_host "${input}". Expected a CrowdStrike hostname like access.crowdstrike.com or access.dodo.crowdstrike.red`);
+        throw new Error(`Invalid access_host "${input}". Expected a CrowdStrike hostname like access.crowdstrike.com`);
     }
     return host;
 }

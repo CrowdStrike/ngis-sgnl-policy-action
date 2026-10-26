@@ -12,7 +12,7 @@ export function validateAccessHost(input: string): string {
 
   if (!ACCESS_HOST_PATTERN.test(host)) {
     throw new Error(
-      `Invalid access_host "${input}". Expected a CrowdStrike hostname like access.crowdstrike.com or access.dodo.crowdstrike.red`
+      `Invalid access_host "${input}". Expected a CrowdStrike hostname like access.crowdstrike.com`
     )
   }
 
