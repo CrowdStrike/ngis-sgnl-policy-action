@@ -50,6 +50,25 @@ describe('query.ts', () => {
     })
   })
 
+  it('sends appId as context.appId when provided', () => {
+    expect(
+      new Query('t', 'abc.com', 'p', 'a1', 'a2', 'app-1').payload()
+    ).toStrictEqual({
+      principal: { id: 'p' },
+      queries: [{ assetId: 'a1', action: 'a2' }],
+      context: { appId: 'app-1' }
+    })
+  })
+
+  it('omits context entirely when appId is absent', () => {
+    for (const query of [
+      new Query('t', 'abc.com', 'p', 'a1', 'a2'),
+      new Query('t', 'abc.com', 'p', 'a1', 'a2', '')
+    ]) {
+      expect(query.payload()).not.toHaveProperty('context')
+    }
+  })
+
   it('generates an endpoint with the correct path', () => {
     expect(new Query('t', 'access.example.com', 'p', 'a', '').endpoint()).toBe(
       'https://access.example.com/v1/evaluations'

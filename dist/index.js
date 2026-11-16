@@ -36867,7 +36867,7 @@ async function run() {
     }
     core.setSecret(accessToken);
     try {
-        const query = new query_1.Query(accessToken, accessHost, core.getInput('principal_id'), core.getInput('asset_id'), core.getInput('action'));
+        const query = new query_1.Query(accessToken, accessHost, core.getInput('principal_id'), core.getInput('asset_id'), core.getInput('action'), core.getInput('app_id'));
         core.debug(`Querying SGNL accessEvaluation API. Query is:\n${JSON.stringify(query.payload(), null, 2)}`);
         const result = await (0, sgnl_1.sgnl)(query);
         core.setOutput('reason', result.reason);
@@ -36916,13 +36916,15 @@ class Query {
     principalId;
     assetId;
     action;
+    appId;
     endpointUrl;
-    constructor(token, accessHost, principalId, assetId, action) {
+    constructor(token, accessHost, principalId, assetId, action, appId = '') {
         this.token = token;
         this.accessHost = accessHost;
         this.principalId = principalId;
         this.assetId = assetId;
         this.action = action;
+        this.appId = appId;
         if (!this.assetId && !this.action) {
             throw new Error("At least one of 'assetId' or 'action' is required.");
         }
@@ -36956,6 +36958,12 @@ class Query {
             q.action = this.action;
         }
         _payload.queries.push(q);
+        // The provider hook mapping matches on a JSON path into this request. `context` is the
+        // free-form field of the Access API, so an appId placed here is reachable as
+        // `{$.context.appId}`. Omitted entirely when unset, to keep the request unchanged.
+        if (this.appId) {
+            _payload.context = { appId: this.appId };
+        }
         return _payload;
     }
 }

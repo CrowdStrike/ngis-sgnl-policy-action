@@ -28,6 +28,12 @@ inputs:
     description:
       An action to pass to SGNL. At least one of 'asset_id' or 'action' is
       required.
+  app_id:
+    required: false
+    description:
+      An identifier for this protected system, sent as the request's
+      context.appId. Map it in the provider hook integration assignment with
+      applicationIdPath {$.context.appId}. Omitted from the request when unset.
   bypass_mode:
     required: true
     description:
