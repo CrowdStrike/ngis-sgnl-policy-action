@@ -61,7 +61,8 @@ export async function run(): Promise<void> {
       accessHost,
       core.getInput('principal_id'),
       core.getInput('asset_id'),
-      core.getInput('action')
+      core.getInput('action'),
+      core.getInput('app_id')
     )
 
     core.debug(

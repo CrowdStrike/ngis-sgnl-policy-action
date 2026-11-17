@@ -1,6 +1,7 @@
 export interface QueryPayload {
   principal: { id: string } | null
   queries: { assetId?: string; action?: string }[]
+  context?: { appId: string }
 }
 
 export class Query {
@@ -9,6 +10,7 @@ export class Query {
   principalId: string
   assetId: string
   action: string
+  appId: string
   endpointUrl: URL
 
   constructor(
@@ -16,13 +18,15 @@ export class Query {
     accessHost: string,
     principalId: string,
     assetId: string,
-    action: string
+    action: string,
+    appId = ''
   ) {
     this.token = token
     this.accessHost = accessHost
     this.principalId = principalId
     this.assetId = assetId
     this.action = action
+    this.appId = appId
 
     if (!this.assetId && !this.action) {
       throw new Error("At least one of 'assetId' or 'action' is required.")
@@ -68,6 +72,13 @@ export class Query {
     }
 
     _payload.queries.push(q)
+
+    // The provider hook mapping matches on a JSON path into this request. `context` is the
+    // free-form field of the Access API, so an appId placed here is reachable as
+    // `{$.context.appId}`. Omitted entirely when unset, to keep the request unchanged.
+    if (this.appId) {
+      _payload.context = { appId: this.appId }
+    }
 
     return _payload
   }
