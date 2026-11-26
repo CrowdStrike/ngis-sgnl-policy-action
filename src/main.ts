@@ -22,8 +22,8 @@ export function validateAccessHost(input: string): string {
 export async function run(): Promise<void> {
   if (core.getInput('bypass_mode') === 'true') {
     core.warning('*** WARNING: BYPASS MODE ENABLED ***')
-    core.warning('*** Skipping SGNL Policy Checks ***')
-    core.setOutput('reason', 'Skipping SGNL call due to bypass_mode=true')
+    core.warning('*** Skipping NGIS Policy Checks ***')
+    core.setOutput('reason', 'Skipping NGIS call due to bypass_mode=true')
     core.setOutput('decision', true)
     return
   }
@@ -66,7 +66,7 @@ export async function run(): Promise<void> {
     )
 
     core.debug(
-      `Querying SGNL accessEvaluation API. Query is:\n${JSON.stringify(
+      `Querying NGIS access evaluation API. Query is:\n${JSON.stringify(
         query.payload(),
         null,
         2
@@ -82,7 +82,7 @@ export async function run(): Promise<void> {
       core.setFailed(result.reason)
     }
   } catch (error) {
-    core.warning('SGNL API request failed')
+    core.warning('NGIS API request failed')
 
     if (
       error != null &&
@@ -93,14 +93,14 @@ export async function run(): Promise<void> {
       'status' in error.response
     ) {
       core.setFailed(
-        `SGNL API request failed with status ${(error.response as { status: number }).status}`
+        `NGIS API request failed with status ${(error.response as { status: number }).status}`
       )
     } else if (
       error != null &&
       typeof error === 'object' &&
       'request' in error
     ) {
-      core.setFailed('SGNL API did not respond')
+      core.setFailed('NGIS API did not respond')
     } else if (error instanceof Error) {
       core.setFailed(error.message)
     } else {

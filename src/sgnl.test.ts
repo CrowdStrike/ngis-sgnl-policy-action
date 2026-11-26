@@ -27,7 +27,7 @@ let denyData: {
   }[]
 }
 
-const basicQuery = new Query('t', 'a.com', 'p', 'a1', 'a2')
+const basicQuery = new Query('t', 'a.com', 'p', 'a1', 'a2', 'app-1')
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -82,7 +82,7 @@ it('returns a deny response without a reason', async () => {
 it('throws if decisions array is empty', async () => {
   axiosMock.post.mockResolvedValue({ data: { decisions: [] } })
   await expect(sgnl(basicQuery)).rejects.toThrow(
-    'SGNL API returned 0 decisions, expected exactly 1'
+    'NGIS API returned 0 decisions, expected exactly 1'
   )
 })
 
@@ -96,6 +96,6 @@ it('throws if decisions array has more than one entry', async () => {
     }
   })
   await expect(sgnl(basicQuery)).rejects.toThrow(
-    'SGNL API returned 2 decisions, expected exactly 1'
+    'NGIS API returned 2 decisions, expected exactly 1'
   )
 })

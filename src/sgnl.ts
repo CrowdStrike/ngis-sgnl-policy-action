@@ -23,7 +23,7 @@ export async function sgnl(query: Query): Promise<SgnlResult> {
     { headers: query.headers() }
   )
 
-  core.debug(`SGNL API returned:\n${JSON.stringify(response.data, null, 2)}`)
+  core.debug(`NGIS API returned:\n${JSON.stringify(response.data, null, 2)}`)
 
   return parse(response.data)
 }
@@ -32,7 +32,7 @@ function parse(data: SgnlResponseData): SgnlResult {
   const decisions = data.decisions
   if (decisions?.length !== 1) {
     throw new Error(
-      `SGNL API returned ${decisions?.length ?? 0} decisions, expected exactly 1`
+      `NGIS API returned ${decisions?.length ?? 0} decisions, expected exactly 1`
     )
   }
   return {

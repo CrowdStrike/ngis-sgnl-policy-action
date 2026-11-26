@@ -35,6 +35,7 @@ describe('action', () => {
       principal_id: 'p',
       asset_id: 'a',
       action: 'b',
+      app_id: 'app-1',
       bypass_mode: 'false'
     }
 
@@ -42,7 +43,7 @@ describe('action', () => {
     getAccessTokenMock.mockResolvedValue('mock-access-token')
   })
 
-  it('skips SGNL API if bypass mode is true', async () => {
+  it('skips NGIS API if bypass mode is true', async () => {
     inputs.bypass_mode = 'true'
 
     await main.run()
@@ -60,7 +61,7 @@ describe('action', () => {
     )
     expect(warning).toHaveBeenNthCalledWith(
       2,
-      '*** Skipping SGNL Policy Checks ***'
+      '*** Skipping NGIS Policy Checks ***'
     )
   })
 
@@ -71,7 +72,7 @@ describe('action', () => {
     expect(setOutputMock).toHaveBeenNthCalledWith(
       1,
       'reason',
-      'Skipping SGNL call due to bypass_mode=true'
+      'Skipping NGIS call due to bypass_mode=true'
     )
     expect(setOutputMock).toHaveBeenNthCalledWith(2, 'decision', true)
   })
@@ -81,7 +82,7 @@ describe('action', () => {
     { bypass_mode: '' },
     { bypass_mode: 'asdfafadfa' }
   ])(
-    'does not skip SGNL API if bypass mode is `$bypass_mode`',
+    'does not skip NGIS API if bypass mode is `$bypass_mode`',
     async ({ bypass_mode }) => {
       inputs.bypass_mode = bypass_mode
       sgnlMock.mockResolvedValue({ decision: true, reason: '' })
@@ -218,7 +219,7 @@ describe('action', () => {
 
     await main.run()
     expect(setFailedMock).toHaveBeenCalledWith(
-      'SGNL API request failed with status 401'
+      'NGIS API request failed with status 401'
     )
   })
 
@@ -228,7 +229,15 @@ describe('action', () => {
     })
 
     await main.run()
-    expect(setFailedMock).toHaveBeenCalledWith('SGNL API did not respond')
+    expect(setFailedMock).toHaveBeenCalledWith('NGIS API did not respond')
+  })
+
+  it('fails job without calling the API when app_id is missing', async () => {
+    inputs.app_id = ''
+
+    await main.run()
+    expect(sgnlMock).not.toHaveBeenCalled()
+    expect(setFailedMock).toHaveBeenCalledWith('An appId is required.')
   })
 
   it('fails job on generic error', async () => {
