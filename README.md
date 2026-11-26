@@ -74,22 +74,25 @@ When the decision is Deny, the step fails, and that stops the job.
 
 ### Inputs
 
-| Input           | Required | Description                                                                                  |
-| --------------- | -------- | -------------------------------------------------------------------------------------------- |
-| `access_host`   | Yes      | NGIS access host, without scheme or path (see the cloud table above).                        |
-| `client_id`     | Yes      | Falcon API client ID.                                                                        |
-| `client_secret` | Yes      | Falcon API client secret.                                                                    |
-| `app_id`        | Yes      | ID of the GitHub protected system.                                                           |
-| `principal_id`  | Yes      | Identity of the principal running the workflow. Typically `github.actor`.                    |
-| `asset_id`      | No       | Asset for the policy check. Typically `github.repository`. Set `asset_id`, `action`, or both. |
-| `action`        | No       | Action for the policy check. Set `asset_id`, `action`, or both.                               |
-| `bypass_mode`   | Yes      | Defaults to `false`. When `true`, skips NGIS and always returns Allow. Use for testing or break glass only. |
+- `access_host` (required): NGIS access host, without scheme or path. See the
+  cloud table above.
+- `client_id` (required): Falcon API client ID.
+- `client_secret` (required): Falcon API client secret.
+- `app_id` (required): ID of the GitHub protected system.
+- `principal_id` (required): Identity of the principal running the workflow.
+  Typically `github.actor`.
+- `asset_id` (optional): Asset for the policy check. Typically
+  `github.repository`. Set `asset_id`, `action`, or both.
+- `action` (optional): Action for the policy check. Set `asset_id`, `action`,
+  or both.
+- `bypass_mode` (required, default `false`): When `true`, skips NGIS and always
+  returns Allow. Use for testing or break glass only.
 
 ### Outputs
 
-| Output     | Description                                         |
-| ---------- | --------------------------------------------------- |
-| `decision` | `true` for Allow, `false` for Deny.                 |
+| Output     | Description                                             |
+| ---------- | ------------------------------------------------------- |
+| `decision` | `true` for Allow, `false` for Deny.                     |
 | `reason`   | The decision reason from the policy evaluation, if any. |
 
 ### Reporting bugs
