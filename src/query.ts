@@ -1,7 +1,7 @@
 export interface QueryPayload {
-  principal: { id: string } | null
+  principal: { id: string }
   queries: { assetId?: string; action?: string }[]
-  context?: { appId: string }
+  context: { appId: string }
 }
 
 export class Query {
@@ -19,7 +19,7 @@ export class Query {
     principalId: string,
     assetId: string,
     action: string,
-    appId = ''
+    appId: string
   ) {
     this.token = token
     this.accessHost = accessHost
@@ -36,7 +36,11 @@ export class Query {
       throw new Error('A principalId is required.')
     }
 
-    this.endpointUrl = new URL('/v1/evaluations', `https://${accessHost}`)
+    if (!this.appId) {
+      throw new Error('An appId is required.')
+    }
+
+    this.endpointUrl = new URL('/v1/providers', `https://${accessHost}`)
 
     if (this.endpointUrl.protocol !== 'https:') {
       throw new Error(
@@ -47,7 +51,9 @@ export class Query {
 
   headers(): Record<string, string> {
     return {
-      Authorization: `Bearer ${this.token}`
+      Authorization: `Bearer ${this.token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
     }
   }
 
@@ -56,13 +62,6 @@ export class Query {
   }
 
   payload(): QueryPayload {
-    const _payload: QueryPayload = {
-      principal: null,
-      queries: []
-    }
-
-    _payload.principal = { id: this.principalId }
-
     const q: { assetId?: string; action?: string } = {}
     if (this.assetId) {
       q.assetId = this.assetId
@@ -71,15 +70,11 @@ export class Query {
       q.action = this.action
     }
 
-    _payload.queries.push(q)
-
-    // The provider hook mapping matches on a JSON path into this request. `context` is the
-    // free-form field of the Access API, so an appId placed here is reachable as
-    // `{$.context.appId}`. Omitted entirely when unset, to keep the request unchanged.
-    if (this.appId) {
-      _payload.context = { appId: this.appId }
+    // /v1/providers routes on the provider hook's applicationIdPath, {$.context.appId}.
+    return {
+      principal: { id: this.principalId },
+      queries: [q],
+      context: { appId: this.appId }
     }
-
-    return _payload
   }
 }

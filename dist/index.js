@@ -36840,8 +36840,8 @@ function validateAccessHost(input) {
 async function run() {
     if (core.getInput('bypass_mode') === 'true') {
         core.warning('*** WARNING: BYPASS MODE ENABLED ***');
-        core.warning('*** Skipping SGNL Policy Checks ***');
-        core.setOutput('reason', 'Skipping SGNL call due to bypass_mode=true');
+        core.warning('*** Skipping NGIS Policy Checks ***');
+        core.setOutput('reason', 'Skipping NGIS call due to bypass_mode=true');
         core.setOutput('decision', true);
         return;
     }
@@ -36868,7 +36868,7 @@ async function run() {
     core.setSecret(accessToken);
     try {
         const query = new query_1.Query(accessToken, accessHost, core.getInput('principal_id'), core.getInput('asset_id'), core.getInput('action'), core.getInput('app_id'));
-        core.debug(`Querying SGNL accessEvaluation API. Query is:\n${JSON.stringify(query.payload(), null, 2)}`);
+        core.debug(`Querying NGIS access evaluation API. Query is:\n${JSON.stringify(query.payload(), null, 2)}`);
         const result = await (0, sgnl_1.sgnl)(query);
         core.setOutput('reason', result.reason);
         core.setOutput('decision', result.decision);
@@ -36877,19 +36877,19 @@ async function run() {
         }
     }
     catch (error) {
-        core.warning('SGNL API request failed');
+        core.warning('NGIS API request failed');
         if (error != null &&
             typeof error === 'object' &&
             'response' in error &&
             error.response != null &&
             typeof error.response === 'object' &&
             'status' in error.response) {
-            core.setFailed(`SGNL API request failed with status ${error.response.status}`);
+            core.setFailed(`NGIS API request failed with status ${error.response.status}`);
         }
         else if (error != null &&
             typeof error === 'object' &&
             'request' in error) {
-            core.setFailed('SGNL API did not respond');
+            core.setFailed('NGIS API did not respond');
         }
         else if (error instanceof Error) {
             core.setFailed(error.message);
@@ -36918,7 +36918,7 @@ class Query {
     action;
     appId;
     endpointUrl;
-    constructor(token, accessHost, principalId, assetId, action, appId = '') {
+    constructor(token, accessHost, principalId, assetId, action, appId) {
         this.token = token;
         this.accessHost = accessHost;
         this.principalId = principalId;
@@ -36931,25 +36931,25 @@ class Query {
         if (!this.principalId) {
             throw new Error('A principalId is required.');
         }
-        this.endpointUrl = new URL('/v1/evaluations', `https://${accessHost}`);
+        if (!this.appId) {
+            throw new Error('An appId is required.');
+        }
+        this.endpointUrl = new URL('/v1/providers', `https://${accessHost}`);
         if (this.endpointUrl.protocol !== 'https:') {
             throw new Error(`Invalid API endpoint from accessHost ${accessHost}. Endpoint must be https://`);
         }
     }
     headers() {
         return {
-            Authorization: `Bearer ${this.token}`
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
         };
     }
     endpoint() {
         return this.endpointUrl.toString();
     }
     payload() {
-        const _payload = {
-            principal: null,
-            queries: []
-        };
-        _payload.principal = { id: this.principalId };
         const q = {};
         if (this.assetId) {
             q.assetId = this.assetId;
@@ -36957,14 +36957,12 @@ class Query {
         if (this.action) {
             q.action = this.action;
         }
-        _payload.queries.push(q);
-        // The provider hook mapping matches on a JSON path into this request. `context` is the
-        // free-form field of the Access API, so an appId placed here is reachable as
-        // `{$.context.appId}`. Omitted entirely when unset, to keep the request unchanged.
-        if (this.appId) {
-            _payload.context = { appId: this.appId };
-        }
-        return _payload;
+        // /v1/providers routes on the provider hook's applicationIdPath, {$.context.appId}.
+        return {
+            principal: { id: this.principalId },
+            queries: [q],
+            context: { appId: this.appId }
+        };
     }
 }
 exports.Query = Query;
@@ -37019,13 +37017,13 @@ const axios_1 = __importDefault(__nccwpck_require__(7269));
 const core = __importStar(__nccwpck_require__(7484));
 async function sgnl(query) {
     const response = await axios_1.default.post(query.endpoint(), query.payload(), { headers: query.headers() });
-    core.debug(`SGNL API returned:\n${JSON.stringify(response.data, null, 2)}`);
+    core.debug(`NGIS API returned:\n${JSON.stringify(response.data, null, 2)}`);
     return parse(response.data);
 }
 function parse(data) {
     const decisions = data.decisions;
     if (decisions?.length !== 1) {
-        throw new Error(`SGNL API returned ${decisions?.length ?? 0} decisions, expected exactly 1`);
+        throw new Error(`NGIS API returned ${decisions?.length ?? 0} decisions, expected exactly 1`);
     }
     return {
         decision: decisions[0].decision === 'Allow',

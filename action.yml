@@ -1,18 +1,25 @@
-name: Check SGNL Policy
+name: Check NGIS Policy
 author: CrowdStrike
-description: Calls SGNL for a policy check using Falcon OAuth2 client credentials.
+description:
+  Calls Falcon Next-Gen Identity Security (NGIS) for a policy check using
+  Falcon OAuth2 client credentials.
 inputs:
   access_host:
     required: true
     description:
-      The SGNL access hostname, without scheme or path (e.g.
-      access.crowdstrike.com, access.us-2.crowdstrike.com).
+      The NGIS access hostname for your Falcon cloud, without scheme or path
+      (e.g. access.crowdstrike.com, access.us-2.crowdstrike.com).
   client_id:
     required: true
     description: Falcon Client ID for OAuth2 authentication
   client_secret:
     required: true
     description: Falcon Client Secret for OAuth2 authentication
+  app_id:
+    required: true
+    description:
+      The ID of the GitHub protected system in the Falcon console. Store it as a
+      repository variable.
   principal_id:
     required: true
     description:
@@ -26,19 +33,13 @@ inputs:
   action:
     required: false
     description:
-      An action to pass to SGNL. At least one of 'asset_id' or 'action' is
+      An action to pass to NGIS. At least one of 'asset_id' or 'action' is
       required.
-  app_id:
-    required: false
-    description:
-      An identifier for this protected system, sent as the request's
-      context.appId. Map it in the provider hook integration assignment with
-      applicationIdPath {$.context.appId}. Omitted from the request when unset.
   bypass_mode:
     required: true
     description:
-      Don't actually call SGNL, instead always return Allow. ~~WARNING~~ Setting
-      this to true will disable using SGNL. Use for testing or break glass only.
+      Don't actually call NGIS, instead always return Allow. ~~WARNING~~ Setting
+      this to true will disable using NGIS. Use for testing or break glass only.
     default: "false"
 
 outputs:
